@@ -5,62 +5,71 @@ import java.awt.event.KeyListener;
 
 @SuppressWarnings("serial")
 public class Main extends JPanel {
+    Ball ball = new Ball(this);
+    Racquet racquet = new Racquet(this);
+    int speed = 1;
 
-    int x = 0;
-    int y = 0;
-    int xa = 1;
-    int ya = 1;
+    private int getScore() {
+        return speed - 1;
+    }
 
-    KeyListener listener = new KeyListener() {
-        @Override
-        public void keyTyped(KeyEvent e) {
-        }
+    public Main() {
+        addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
 
-        @Override
-        public void keyPressed(KeyEvent e) {
-            System.out.println("keyPressed="+KeyEvent.getKeyText(e.getKeyCode()));
-        }
+            @Override
+            public void keyReleased(KeyEvent e) {
+                racquet.keyReleased(e);
+            }
 
-        @Override
-        public void keyReleased(KeyEvent e) {
-            System.out.println("keyReleased="+KeyEvent.getKeyText(e.getKeyCode()));
-        }
-    };
+            @Override
+            public void keyPressed(KeyEvent e) {
+                racquet.keyPressed(e);
+            }
+        });
+        setFocusable(true);
+    }
 
-    private void moveBall(){
-        if (x + xa < 0) xa = 1;
-
-        if (x + xa > getWidth() - 30) xa = -1;
-
-        if (y + ya < 0) ya = 1;
-
-        if (y + ya > getHeight() - 30) ya = -1;
-
-        x= x + xa;
-
-        y = y + ya;
+    private void move() {
+        ball.move();
+        racquet.move();
     }
 
     @Override
-    public void paint(Graphics g){
-        //superpaint se usa para que el circulo se actualice automaticamnete y no deje la linea
+    public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.fillOval(x,y,30,30);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        ball.paint(g2d);
+        racquet.paint(g2d);
 
+        g2d.setColor(Color.GRAY);
+        g2d.setFont(new Font("Verdana", Font.BOLD, 30));
+        g2d.drawString(String.valueOf(getScore()), 10, 30);
+    }
+
+    public void gameOver() {
+        JOptionPane.showMessageDialog(this, "your score is: " + getScore(),
+                "Game Over", JOptionPane.YES_NO_OPTION);
+        System.exit(ABORT);
     }
 
     public static void main(String[] args) throws InterruptedException {
         JFrame frame = new JFrame("Mini Tennis");
-        Main main = new Main();
-        frame.add(main);
-        frame.setSize(300,400);
+        Main game = new Main();
+        frame.add(game);
+        frame.setSize(500, 590);
+        frame.setLocationRelativeTo(null);
+        frame.setBackground(Color.BLUE);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        while (true){
-            main.moveBall();
-            main.repaint();
+
+        while (true) {
+            game.move();
+            game.repaint();
             Thread.sleep(10);
         }
     }
